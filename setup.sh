@@ -1,44 +1,43 @@
 #!/bin/bash
-echo "Ensure packages are installed:"
-sudo apt-get install python3-numpy git firefox-esr python3-pip
 
-echo "Clone repositories:"
-git clone https://github.com/kingmemeh/spotipy.git
-cd spotipi-eink
-git clone https://github.com/pimoroni/inky
+# Check if inky directory exists
+if [ -d "inky" ]; then
+    echo "inky directory already exists. Removing..."
+    rm -rf inky
+fi
 
-echo "Add font to system:"
-sudo cp ./fonts/CircularStd-Bold.otf /usr/share/fonts/opentype/CircularStd-Bold/CircularStd-Bold.otf
+# Clone inky repository
+git clone https://github.com/pimoroni/inky.git
 
-echo "Installing spotipy library:"
-pip3 install spotipy
+# Check if font exists
+if [ ! -f "./fonts/CircularStd-Bold.otf" ]; then
+    echo "Error: Font file not found. Please ensure CircularStd-Bold.otf is in the fonts directory."
+    exit 1
+fi
 
-echo "Installing pillow library:"
-pip3 install pillow
+# Add font to system
+sudo cp ./fonts/CircularStd-Bold.otf /usr/share/fonts/
 
-echo "Installing inky impression libraries:"
-pip3 install inky[rpi,example-depends]
+# Create and activate virtual environment
+python3 -m venv spotipi_env
+source spotipi_env/bin/activate
 
-echo "Remove numpy:"
-pip3 uninstall numpy
+# Install required Python packages
+pip install spotipy pillow inky
 
+# Prompt for Spotify credentials
 echo "Enter your Spotify Client ID:"
-read spotify_client_id
-export SPOTIPY_CLIENT_ID=$spotify_client_id
-
+read client_id
 echo "Enter your Spotify Client Secret:"
-read spotify_client_secret
-export SPOTIPY_CLIENT_SECRET=$spotify_client_secret
-
+read client_secret
 echo "Enter your Spotify Redirect URI:"
-read spotify_redirect_uri
-export SPOTIPY_REDIRECT_URI=$spotify_redirect_uri
-
+read redirect_uri
 echo "Enter your spotify username:"
 read spotify_username
 
+# Generate Spotify token
 echo "Generating Spotify token..."
-python3 python/generateToken.py $spotify_username
+python python/generateToken.py $spotify_username
 if [ $? -ne 0 ]; then
     echo "Error: Failed to generate Spotify token. Check your credentials and try again."
     exit 1
@@ -48,7 +47,6 @@ echo
 echo "###### Spotify Token Created ######"
 echo "Filename: .cache"
 
-# Add this line to check if the file exists
 if [ ! -f ".cache" ]; then
     echo "Error: .cache file not found. Token generation may have failed."
     exit 1
@@ -57,7 +55,10 @@ fi
 echo "Enter the full path to your spotify token:"
 read spotify_token_path
 
-install_path=$(pwd)
+# ... rest of your existing script ...
+
+# Deactivate virtual environment
+deactivate
 
 echo "Removing spotipi service if it exists:"
 sudo systemctl stop spotipi
