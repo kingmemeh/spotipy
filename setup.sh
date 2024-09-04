@@ -9,15 +9,6 @@ fi
 # Clone inky repository
 git clone https://github.com/pimoroni/inky.git
 
-# Check if font exists
-if [ ! -f "./fonts/CircularStd-Bold.otf" ]; then
-    echo "Error: Font file not found. Please ensure CircularStd-Bold.otf is in the fonts directory."
-    exit 1
-fi
-
-# Add font to system
-sudo cp ./fonts/CircularStd-Bold.otf /usr/share/fonts/
-
 # Create and activate virtual environment
 python3 -m venv spotipi_env
 source spotipi_env/bin/activate
