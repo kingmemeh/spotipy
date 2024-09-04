@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Ensure packages are installed:"
-sudo apt-get install python3-numpy git firefox-esr
+sudo apt-get install python3-numpy git firefox-esr python3-pip
 
 echo "Clone repositories:"
 git clone https://github.com/kingmemeh/spotipy.git
@@ -11,10 +11,10 @@ echo "Add font to system:"
 sudo cp ./fonts/CircularStd-Bold.otf /usr/share/fonts/opentype/CircularStd-Bold/CircularStd-Bold.otf
 
 echo "Installing spotipy library:"
-pip install spotipy --upgrade
+pip3 install spotipy
 
 echo "Installing pillow library:"
-pip install pillow --upgrade
+pip3 install pillow
 
 echo "Installing inky impression libraries:"
 pip3 install inky[rpi,example-depends]
@@ -37,11 +37,22 @@ export SPOTIPY_REDIRECT_URI=$spotify_redirect_uri
 echo "Enter your spotify username:"
 read spotify_username
 
-python python/generateToken.py $spotify_username
+echo "Generating Spotify token..."
+python3 python/generateToken.py $spotify_username
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to generate Spotify token. Check your credentials and try again."
+    exit 1
+fi
 
 echo
 echo "###### Spotify Token Created ######"
 echo "Filename: .cache"
+
+# Add this line to check if the file exists
+if [ ! -f ".cache" ]; then
+    echo "Error: .cache file not found. Token generation may have failed."
+    exit 1
+fi
 
 echo "Enter the full path to your spotify token:"
 read spotify_token_path
